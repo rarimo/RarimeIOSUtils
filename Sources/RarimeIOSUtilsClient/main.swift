@@ -1,8 +1,18 @@
+import Foundation
+
 import RarimeIOSUtils
 
-let a = 17
-let b = 25
+enum ZKUtils {
+    static let ERROR_SIZE = UInt(256)
+    static let WITNESS_SIZE = UInt(100 * 1024 * 1024)
+    static let PROOF_SIZE = UInt(4 * 1024 * 1024)
+    static let PUB_SIGNALS_SIZE = UInt(4 * 1024 * 1024)
 
-let (result, code) = #stringify(a + b)
+    private static func handleWitnessError(
+        _ result: Int32,
+        _ errorBuffer: UnsafeMutablePointer<UInt8>,
+        _ wtnsSize: UnsafeMutablePointer<UInt>
+    ) throws {}
 
-print("The value \(result) was produced by the code \"\(code)\"")
+//    #registerCircuitWitness("registerIdentity")
+}

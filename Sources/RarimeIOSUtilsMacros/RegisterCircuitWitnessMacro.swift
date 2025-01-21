@@ -3,47 +3,50 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-public struct RegisterCircuitWitnessMacro: MemberMacro {
+public struct RegisterCircuitWitnessMacro: DeclarationMacro {
     public static func expansion(
-        of node: AttributeSyntax,
-        providingMembersOf decl: some DeclSyntaxProtocol,
+        of node: some FreestandingMacroExpansionSyntax,
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
-        guard case let .argumentList(arguments) = node.arguments,
-              let firstArg = arguments.first?.expression as? StringLiteralExprSyntax,
-              let circuitName = firstArg.segments.first?.description
+
+        guard let argument = node.arguments.first?.expression,
+              let segments = argument.as(StringLiteralExprSyntax.self)?.segments,
+              segments.count == 1,
+              case .stringSegment(let literalSegment)? = segments.first
         else {
-            throw MacroExpansionErrorMessage("Expected a circuit name as a string literal.")
+            throw MacroExpansionErrorMessage("Need a static string")
         }
 
-        let functionDecl = """
-        static func calcWtns_\(circuitName)(
-            _ descriptionFileData: Data,
-            _ privateInputsJson: Data
-        ) throws -> Data {
-        #if targetEnvironment(simulator)
-            return Data()
-        #else
-            let wtnsSize = UnsafeMutablePointer<UInt>.allocate(capacity: Int(1))
-            wtnsSize.initialize(to: WITNESS_SIZE)
-            let wtnsBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(WITNESS_SIZE))
-            let errorBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(ERROR_SIZE))
+        let circuitName = literalSegment.content.text
 
-            let result = witnesscalc_\(circuitName)(
-                (descriptionFileData as NSData).bytes, UInt(descriptionFileData.count),
-                (privateInputsJson as NSData).bytes, UInt(privateInputsJson.count),
-                wtnsBuffer, wtnsSize,
-                errorBuffer, ERROR_SIZE
-            )
+        return [
+            """
+            static func calcWtns_\(raw: circuitName)(
+                _ descriptionFileData: Data,
+                _ privateInputsJson: Data
+            ) throws -> Data {
+            #if targetEnvironment(simulator)
+                return Data()
+            #else
+                let wtnsSize = UnsafeMutablePointer<UInt>.allocate(capacity: Int(1))
+                wtnsSize.initialize(to: WITNESS_SIZE)
+                let wtnsBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(WITNESS_SIZE))
+                let errorBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(ERROR_SIZE))
 
-            try handleWitnessError(result, errorBuffer, wtnsSize)
+                let result = witnesscalc_\(raw: circuitName)(
+                    (descriptionFileData as NSData).bytes, UInt(descriptionFileData.count),
+                    (privateInputsJson as NSData).bytes, UInt(privateInputsJson.count),
+                    wtnsBuffer, wtnsSize,
+                    errorBuffer, ERROR_SIZE
+                )
 
-            return Data(bytes: wtnsBuffer, count: Int(wtnsSize.pointee))
-        #endif
-        }
-        """
+                try handleWitnessError(result, errorBuffer, wtnsSize)
 
-        return [DeclSyntax(stringLiteral: functionDecl)]
+                return Data(bytes: wtnsBuffer, count: Int(wtnsSize.pointee))
+            #endif
+            }
+            """,
+        ]
     }
 }
 
