@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:RarimeIOSUtils}",
+            "name": "Debug RarimeIOSUtilsClient",
+            "program": "${workspaceFolder:RarimeIOSUtils}/.build/debug/RarimeIOSUtilsClient",
+            "preLaunchTask": "swift: Build Debug RarimeIOSUtilsClient"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:RarimeIOSUtils}",
+            "name": "Release RarimeIOSUtilsClient",
+            "program": "${workspaceFolder:RarimeIOSUtils}/.build/release/RarimeIOSUtilsClient",
+            "preLaunchTask": "swift: Build Release RarimeIOSUtilsClient"
+        }
+    ]
+}
