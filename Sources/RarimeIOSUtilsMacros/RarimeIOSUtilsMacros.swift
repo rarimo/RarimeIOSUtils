@@ -3,6 +3,17 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
+enum MacroError: Error {
+    case invalidArgumentString
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidArgumentString:
+            return "Invalid argument string. Expecting a single string literal."
+        }
+    }
+}
+
 public struct RegisterCircuitWitnessMacro: DeclarationMacro {
     public static func expansion(
         of node: some FreestandingMacroExpansionSyntax,
@@ -13,7 +24,7 @@ public struct RegisterCircuitWitnessMacro: DeclarationMacro {
               segments.count == 1,
               case .stringSegment(let literalSegment)? = segments.first
         else {
-            throw MacroExpansionErrorMessage("Need a static string")
+            throw MacroError.invalidArgumentString
         }
 
         let circuitName = literalSegment.content.text

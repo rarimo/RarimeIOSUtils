@@ -14,5 +14,5 @@ enum ZKUtils {
         _ wtnsSize: UnsafeMutablePointer<UInt>
     ) throws {}
 
-//    #registerCircuitWitness("registerIdentity")
+    //  registerCircuitWitness("registerIdentity")
 }
