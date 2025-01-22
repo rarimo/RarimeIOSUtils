@@ -52,7 +52,6 @@ public struct RegisterCircuitWitnessMacro: DeclarationMacro {
 @main
 struct RarimeIOSUtilsPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
-        StringifyMacro.self,
         RegisterCircuitWitnessMacro.self,
     ]
 }
