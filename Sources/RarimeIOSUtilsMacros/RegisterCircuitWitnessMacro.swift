@@ -8,7 +8,6 @@ public struct RegisterCircuitWitnessMacro: DeclarationMacro {
         of node: some FreestandingMacroExpansionSyntax,
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
-
         guard let argument = node.arguments.first?.expression,
               let segments = argument.as(StringLiteralExprSyntax.self)?.segments,
               segments.count == 1,
